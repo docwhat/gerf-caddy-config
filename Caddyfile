@@ -1,0 +1,40 @@
+{
+	email docwhat@gerf.org
+	debug
+}
+
+(headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+		# disable clients from sniffing the media type
+		X-Content-Type-Options nosniff
+
+		# clickjacking protection
+		X-Frame-Options DENY
+
+		# keep referrer data off of HTTP connections
+		Referrer-Policy no-referrer-when-downgrade
+	}
+}
+
+{$DOCWHAT_DOMAIN:docwhat.localhost}:80 {
+	@go-get expression `query({'go-get': '1'}) && method('GET', 'HEAD')`
+	encode zstd gzip
+	root * /srv
+	file_server
+	import headers
+
+	handle @go-get {
+		reverse_proxy http://go-importd:80
+	}
+
+	handle {
+		file_server /srv
+	}
+}
+
+www.{$DOCWHAT_DOMAIN:docwhat.localhost}:80 {
+	import headers
+	redir http://{$DOCWHAT_DOMAIN:docwhat.localhost}{uri}
+}

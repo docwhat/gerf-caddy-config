@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+cmd=(
+	docker
+	run
+	"--rm"
+	"--tty"
+	"--interactive"
+	"--pull=always"
+	"--platform=linux/amd64"
+	"--volume=gerf-caddy-config_caddy_site:/srv"
+	"ghcr.io/docwhat/website:latest"
+
+	sh -c 'apk add rsync && rsync -rav --delete-after /html/ /srv/'
+)
+
+set -x
+exec "${cmd[@]}"
+
+# EOF

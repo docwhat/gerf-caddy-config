@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+exec docker run --rm -it --volume="${PWD}:${PWD}" --workdir="${PWD}" caddy \
+	caddy fmt --overwrite "${@:-"${root}/Caddyfile"}"
+
+# EOF

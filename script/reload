@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+exec docker compose exec -w /etc/caddy caddy caddy reload
+
+# EOF
