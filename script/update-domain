@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+die() {
+	echo "$1" >&2
+	exit 1
+}
+
+lookup_domain_id() {
+	local domain_name
+	local domain_id
+	domain_name=${1:-'docwhat.dev'}
+	domain_id=$(linode-cli domains list \
+		--format=id --text --no-header --domain="${domain_name}")
+
+	if [[ -z ${domain_id} ]]; then
+		die "Domain ${domain_name} not found"
+	fi
+
+	echo "${domain_id}"
+}
+
+lookup_record_id() {
+	local domain_id=$1
+	local name=$2
+	local type=${3:-A}
+	local record_id
+
+	record_id=$(linode-cli domains records-list "${domain_id}" \
+		--format=id --text --no-header --name="${name}" --type="${type}")
+
+	if [[ -z ${record_id} ]]; then
+		die "Record type ${type} with name ${name} in domainId ${domain_id} not found"
+	fi
+
+	echo "${record_id}"
+}
+
+usage() {
+	cat <<-USAGE
+		Usage: $0 [options]
+
+		Options:
+		  --help          Show this help message and exit
+		  --domain        Domain name to update
+		  --ip4           IPv4 A record to use for update
+		  --ip6           IPv6 AAAA record to use for update
+		  --dry-run       Print the changes without applying them
+	USAGE
+}
+
+update() {
+	local a_target='[remote_addr]'
+	local aaaa_target='[remote_addr]'
+
+	local domain
+	local -i dry_run=0
+
+	while (($# > 0)); do
+		case $1 in
+		--help | -h)
+			usage
+			exit 0
+			;;
+		--domain)
+			domain=$2
+			shift
+			;;
+		--domain=*)
+			domain=${1#*=}
+			;;
+		--a-target | --ip4)
+			a_target=$2
+			shift
+			;;
+		--a-target=* | --ip4=*)
+			a_target=${1#*=}
+			;;
+		--aaaa-target | --ip6)
+			aaaa_target=$2
+			shift
+			;;
+		--aaaa-target=* | --ip6=*)
+			aaaa_target=${1#*=}
+			;;
+		--dry-run)
+			dry_run=1
+			;;
+		*)
+			die "Invalid option: $1"
+			;;
+		esac
+		shift
+	done
+
+	if [[ -z ${domain-} ]]; then
+		die "Domain is required"
+	fi
+
+	local domain_id
+	local top_a_record
+	local top_aaaa_record
+	local sub_a_record
+	local sub_aaaa_record
+
+	domain_id=$(lookup_domain_id "${domain}")
+
+	top_a_record=$(lookup_record_id "${domain_id}" "" "A")
+	top_aaaa_record=$(lookup_record_id "${domain_id}" "" "AAAA")
+
+	sub_a_record=$(lookup_record_id "${domain_id}" "*" "A")
+	sub_aaaa_record=$(lookup_record_id "${domain_id}" "*" "AAAA")
+
+	{
+		printf "Updating records for domain (id:%d) %s\n" "${domain_id}" "${domain}"
+		printf "Updating A record (id:%d) to %s\n" "${top_a_record}" "${a_target}"
+		printf "Updating AAAA record (id:%d) to %s\n" "${top_aaaa_record}" "${aaaa_target}"
+		printf "Updating subdomain A record (id:%d) to %s\n" "${sub_a_record}" "${a_target}"
+		printf "Updating subdomain AAAA record (id:%d) to %s\n" "${sub_aaaa_record}" "${aaaa_target}"
+	} 1>&2
+
+	if ! ((dry_run)); then
+		linode-cli domains records-update \
+			--name= \
+			--target="${a_target}" \
+			"${domain_id}" "${top_a_record}"
+
+		linode-cli domains records-update \
+			--name= \
+			--target="${aaaa_target}" \
+			"${domain_id}" "${top_aaaa_record}"
+
+		linode-cli domains records-update \
+			--name='*' \
+			--target="${a_target}" \
+			"${domain_id}" "${sub_a_record}"
+
+		linode-cli domains records-update \
+			--name='*' \
+			--target="${aaaa_target}" \
+			"${domain_id}" "${sub_aaaa_record}"
+	fi
+}
+
+update "$@"
+
+# EOF
