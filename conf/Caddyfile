@@ -30,9 +30,6 @@ https://docwhat.org {
 	# 'docwhat/go-importd' checks Git Hub and redirects there.
 	@go-get expression `query({'go-get': '1'}) && method('GET', 'HEAD')`
 	reverse_proxy @go-get http://go-importd:80
-
-	# Serve the website.
-	file_server
 }
 
 https://www.docwhat.org {
