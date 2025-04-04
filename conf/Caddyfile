@@ -35,3 +35,10 @@ https://docwhat.org {
 https://www.docwhat.org {
 	redir https://docwhat.org{uri}
 }
+
+https://1993.docwhat.org {
+	encode
+	root /srv/1993
+	file_server
+	import headers
+}
