@@ -1,0 +1,42 @@
+{
+	email {env.ACME_EMAIL}
+	acme_dns linode {
+		api_token {env.LINODE_PERSONAL_ACCESS_TOKEN}
+	}
+	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+	debug
+}
+
+(headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+		# disable clients from sniffing the media type
+		X-Content-Type-Options nosniff
+
+		# clickjacking protection
+		X-Frame-Options DENY
+
+		# keep referrer data off of HTTP connections
+		Referrer-Policy no-referrer-when-downgrade
+	}
+}
+
+https://docwhat.org {
+	encode
+	root /srv/docwhat
+	file_server
+	import headers
+
+	# Queries used by 'go get' to fetch package metadata.
+	# 'docwhat/go-importd' checks Git Hub and redirects there.
+	@go-get expression `query({'go-get': '1'}) && method('GET', 'HEAD')`
+	reverse_proxy @go-get http://go-importd:80
+
+	# Serve the website.
+	file_server
+}
+
+https://www.docwhat.org {
+	redir https://docwhat.org{uri}
+}

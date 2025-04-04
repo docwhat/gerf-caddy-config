@@ -1,31 +1,48 @@
 services:
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    read_only: true
-    ports:
-      - 80:80
-      - 443:443
-      # - 443:443/udp
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_site:/srv
-      - caddy_data:/data
-      - caddy_config:/config
+    caddy:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        read_only: true
+        cap_add:
+            - NET_ADMIN
+        environment:
+            LINODE_DEBUG: false
+        secrets:
+            - caddy_envfile
+        ports:
+            - 80:80
+            - 443:443
+            - 443:443/udp
+        volumes:
+            - type: bind
+              source: ./conf/
+              target: /etc/caddy/
+              read_only: true
+            - type: bind
+              source: ./srv/
+              target: /srv/
+              read_only: true
+            - type: bind
+              source: ./data/
+              target: /data/
+            - type: bind
+              source: ./config/
+              target: /config/
 
-  go-importd:
-    image: ghcr.io/docwhat/go-importd:latest
-    restart: unless-stopped
-    read_only: true
-    ports:
-      - 8001:80
+    go-importd:
+        image: ghcr.io/docwhat/go-importd:latest
+        restart: unless-stopped
+        read_only: true
+        ports:
+            - 8001:80
 
-volumes:
-  caddy_data: {}
-  caddy_config: {}
-  caddy_site: {}
+secrets:
+    caddy_envfile:
+        file: ./secrets/caddy_envfile.txt
 
 networks:
-  internal:
-    driver: bridge
+    internal:
+        driver: bridge
 # EOF

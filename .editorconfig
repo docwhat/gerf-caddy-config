@@ -14,3 +14,9 @@ trim_trailing_whitespace = true
 
 [*.{yml,yaml}]
 max_line_length = off
+indent_style = space
+indent_size = 4
+
+[Caddyfile]
+indent_style = space
+indent_size = 4

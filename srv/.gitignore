@@ -1,0 +1,4 @@
+# This directory is mounted into docker and contains the various sites.
+*
+!.gitignore
+!README.md

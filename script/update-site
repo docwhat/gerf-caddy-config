@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 cmd=(
 	docker
 	run
@@ -10,10 +12,10 @@ cmd=(
 	"--interactive"
 	"--pull=always"
 	"--platform=linux/amd64"
-	"--volume=gerf-caddy-config_caddy_site:/srv"
+	"--volume=${root}/srv/docwhat/:/srv/docwhat/"
 	"ghcr.io/docwhat/website:latest"
 
-	sh -c 'apk add rsync && rsync -rav --delete-after /html/ /srv/'
+	sh -c 'apk add rsync && rsync -rav --delete-after /html/ /srv/docwhat/'
 )
 
 set -x
