@@ -20,23 +20,41 @@
 	}
 }
 
-https://docwhat.org {
+docwhat.org {
 	encode
-	root /srv/docwhat
-	file_server
 	import headers
 
-	# Queries used by 'go get' to fetch package metadata.
-	# 'docwhat/go-importd' checks Git Hub and redirects there.
-	@go-get expression `query({'go-get': '1'}) && method('GET', 'HEAD')`
-	reverse_proxy @go-get http://go-importd:80
+	route {
+		# Queries used by 'go get' to fetch package metadata.
+		# 'docwhat/go-importd' checks Git Hub and redirects there.
+		@go-get expression `query({'go-get': '1'}) && method('GET', 'HEAD')`
+		reverse_proxy @go-get http://go-importd:80
+
+		# Street Cleaning calendar.
+		root /street-cleaning.ics /srv/street-cleaning
+
+		root /srv/docwhat
+		file_server
+	}
 }
 
-https://www.docwhat.org {
+www.docwhat.org {
 	redir https://docwhat.org{uri}
 }
 
-https://1993.docwhat.org {
+gerf.org {
+	redir https://docwhat.org{uri}
+}
+
+christian.holtje.org, holtje.org {
+	redir https://docwhat.org{uri}
+}
+
+# robin.holtje.org, robin.holtje.org {
+# 	redir https://docwhat.org{uri}
+# }
+
+1993.docwhat.org {
 	encode
 	root /srv/1993
 	file_server
