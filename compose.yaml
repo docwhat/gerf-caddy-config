@@ -15,9 +15,6 @@ services:
             - 80:80
             - 443:443
             - 443:443/udp
-        networks:
-            - default
-            - internal
         volumes:
             - type: bind
               source: ./conf/
@@ -40,15 +37,8 @@ services:
         read_only: true
         ports:
             - 8001:80
-        networks:
-            - internal
 
 secrets:
     caddy_envfile:
         file: ./secrets/caddy_envfile.txt
-
-networks:
-    internal:
-        internal: true
-        driver: bridge
 # EOF
