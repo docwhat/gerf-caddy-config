@@ -2,3 +2,24 @@
 COMPOSE_BAKE = "true"
 BUILDKIT_PROGRESS = "plain"
 DOCKER_BUILDKIT = "1"
+
+[tasks.check]
+description = "Check the files for issues"
+alias = ["c"]
+run = "script/trunk check"
+
+[tasks.fix]
+description = "Fix any issues in the files"
+alias = ["f"]
+run = "script/trunk check --fix"
+
+[tasks.format]
+description = "Format the files"
+alias = ["fmt"]
+run = "script/trunk fmt"
+
+[tasks.up]
+run = "docker compose up --detach"
+
+[tasks.build]
+run = "docker compose build --pull"
