@@ -1,0 +1,4 @@
+[env]
+COMPOSE_BAKE = "true"
+BUILDKIT_PROGRESS = "plain"
+DOCKER_BUILDKIT = "1"
