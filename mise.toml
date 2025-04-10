@@ -1,6 +1,5 @@
 [env]
 COMPOSE_BAKE = "true"
-BUILDKIT_PROGRESS = "plain"
 DOCKER_BUILDKIT = "1"
 
 [tasks.check]
@@ -10,7 +9,6 @@ run = "script/trunk check"
 
 [tasks.fix]
 description = "Fix any issues in the files"
-alias = ["f"]
 run = "script/trunk check --fix"
 
 [tasks.format]
@@ -19,7 +17,10 @@ alias = ["fmt"]
 run = "script/trunk fmt"
 
 [tasks.up]
+description = "Start or update"
 run = "docker compose up --detach"
 
 [tasks.build]
-run = "docker compose build --pull"
+description = "Build the docker image(s)"
+alias = ["b"]
+run = "docker compose build --pull | cat"
