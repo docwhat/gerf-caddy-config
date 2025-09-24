@@ -42,6 +42,12 @@ www.docwhat.org {
 	redir https://docwhat.org{uri}
 }
 
+void.docwhat.org {
+	encode
+	import headers
+    root /srv/void
+}
+
 gerf.org {
 	redir https://docwhat.org{uri}
 }
