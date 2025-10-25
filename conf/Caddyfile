@@ -46,6 +46,7 @@ void.docwhat.org {
 	encode
 	import headers
     root /srv/void
+	file_server
 }
 
 gerf.org {
